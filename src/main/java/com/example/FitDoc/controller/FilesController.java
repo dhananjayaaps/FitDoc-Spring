@@ -35,7 +35,7 @@ public class FilesController {
         try {
             storageService.save(file);
 
-            message = "Uploaded the file successfully: " + file.getOriginalFilename();
+            message = file.getOriginalFilename();
             return ResponseEntity.status(HttpStatus.OK).body(new ResponseMessage(message));
         } catch (Exception e) {
             message = "Could not upload the file: " + file.getOriginalFilename() + ". Error: " + e.getMessage();
