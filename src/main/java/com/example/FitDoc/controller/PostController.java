@@ -2,13 +2,14 @@ package com.example.FitDoc.controller;
 
 import com.example.FitDoc.model.Post;
 import com.example.FitDoc.repository.PostRepository;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.nimbusds.jose.shaded.gson.Gson;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.Console;
 import java.util.List;
 
 @RestController
@@ -19,29 +20,73 @@ public class PostController {
     private PostRepository postRepository;
 
     @GetMapping
-    public String getAllPosts() {
-        List<Post> posts = postRepository.findAll();
-        return new Gson().toJson(posts);
+    public List<Post> getAllPosts() {
+        return postRepository.findAll();
     }
 
     @GetMapping("/{id}")
-    public Post getPostById(@PathVariable String id) {
-        return postRepository.findById(id).orElse(null);
+    public ResponseEntity<Post> getPostById(@PathVariable String id) {
+        Post post = postRepository.findById(id).orElse(null);
+        if (post != null) {
+            return new ResponseEntity<>(post, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
     }
 
     @PostMapping
-    public Post createPost(@RequestBody Post post) {
-        return postRepository.save(post);
+    public ResponseEntity<Post> createPost(@RequestBody Post post, @AuthenticationPrincipal OAuth2User user) {
+        String userName = (String) user.getAttribute("name");
+        String userImageUrl = (String) user.getAttribute("picture");
+        String userEmail = (String) user.getAttribute("email");
+        System.out.println("User email: " + userEmail);
+        post.setUserName(userName);
+        post.setUserImageUrl(userImageUrl);
+        post.setUserEmailAddress(userEmail);
+        Post savedPost = postRepository.save(post);
+        return new ResponseEntity<>(savedPost, HttpStatus.CREATED);
     }
 
-//    @PutMapping("/{id}")
-//    public Post updatePost(@PathVariable String id, @RequestBody Post updatedPost) {
-//        updatedPost.setId(id); // Ensure the ID is set
-//        return postRepository.save(updatedPost);
-//    }
+
+    @PutMapping("/like/{id}")
+    public ResponseEntity<Post> likePost(@PathVariable String id) {
+        Post post = postRepository.findById(id).orElse(null);
+        if (post != null) {
+            post.setLikes(post.getLikes() + 1);
+            postRepository.save(post);
+            return new ResponseEntity<>(post, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @PutMapping("/dislike/{id}")
+    public ResponseEntity<Post> dislikePost(@PathVariable String id) {
+        Post post = postRepository.findById(id).orElse(null);
+        if (post != null) {
+            post.setLikes(post.getLikes() - 1);
+            postRepository.save(post);
+            return new ResponseEntity<>(post, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
 
     @DeleteMapping("/{id}")
-    public void deletePost(@PathVariable String id) {
+    public ResponseEntity<Void> deletePost(@PathVariable String id) {
         postRepository.deleteById(id);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Post> editPost(@PathVariable String id, @RequestBody Post post) {
+        Post postToEdit = postRepository.findById(id).orElse(null);
+        if (postToEdit != null) {
+            postToEdit.setContent(post.getContent());
+            postRepository.save(postToEdit);
+            return new ResponseEntity<>(postToEdit, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
     }
 }
