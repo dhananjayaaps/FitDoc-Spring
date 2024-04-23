@@ -18,6 +18,7 @@ public class Post {
     private int likes;
     private String userEmailAddress;
     private List<String> likedBy;
+    private String timestamp;
 
     public Post(String content, String imageUrl) {
         super();
@@ -91,6 +92,14 @@ public class Post {
 
     public String getUserEmailAddress() {
         return userEmailAddress;
+    }
+
+    public String getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(String timestamp) {
+        this.timestamp = timestamp;
     }
 }
 

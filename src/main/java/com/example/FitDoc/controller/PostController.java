@@ -12,6 +12,8 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.web.bind.annotation.*;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 
 @RestController
@@ -30,6 +32,16 @@ public class PostController {
 
         for (Post post : posts) {
             JsonObject postObject = new JsonObject();
+
+            String Timestamp = new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss").format(new Date());
+            System.out.println(Timestamp);
+            System.out.println(post.getTimestamp().substring(0, 10));
+
+            if (Timestamp.equals(post.getTimestamp().substring(0, 10))) {
+                postObject.addProperty("timestamp", post.getTimestamp().substring(11, 16));
+            } else {
+                postObject.addProperty("timestamp", post.getTimestamp().substring(0, 10));
+            }
 
             postObject.addProperty("id", post.getId());
             postObject.addProperty("content", post.getContent());
@@ -62,10 +74,11 @@ public class PostController {
         String userName = (String) user.getAttribute("name");
         String userImageUrl = (String) user.getAttribute("picture");
         String userEmail = (String) user.getAttribute("email");
-        System.out.println("User email: " + userEmail);
+        String Timestamp = new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss").format(new Date());
         post.setUserName(userName);
         post.setUserImageUrl(userImageUrl);
         post.setUserEmailAddress(userEmail);
+        post.setTimestamp(Timestamp);
         Post savedPost = postRepository.save(post);
         return new ResponseEntity<>(savedPost, HttpStatus.CREATED);
     }
