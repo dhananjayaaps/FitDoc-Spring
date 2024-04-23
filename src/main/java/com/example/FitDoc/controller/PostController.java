@@ -2,6 +2,9 @@ package com.example.FitDoc.controller;
 
 import com.example.FitDoc.model.Post;
 import com.example.FitDoc.repository.PostRepository;
+import com.nimbusds.jose.shaded.gson.Gson;
+import com.nimbusds.jose.shaded.gson.JsonArray;
+import com.nimbusds.jose.shaded.gson.JsonObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -9,7 +12,6 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.Console;
 import java.util.List;
 
 @RestController
@@ -19,9 +21,12 @@ public class PostController {
     @Autowired
     private PostRepository postRepository;
 
-    @GetMapping
-    public List<Post> getAllPosts() {
-        return postRepository.findAll();
+    @GetMapping()
+    public String getAllPosts() {
+        List<Post> posts = postRepository.findAll();
+        Gson gson = new Gson();
+        String jsonPosts = gson.toJson(posts);
+        return jsonPosts;
     }
 
     @GetMapping("/{id}")
@@ -47,11 +52,12 @@ public class PostController {
         return new ResponseEntity<>(savedPost, HttpStatus.CREATED);
     }
 
-
-    @PutMapping("/like/{id}")
-    public ResponseEntity<Post> likePost(@PathVariable String id) {
+    @GetMapping("/like/{id}")
+    public ResponseEntity<Post> likePost(@PathVariable String id, @AuthenticationPrincipal OAuth2User user) {
         Post post = postRepository.findById(id).orElse(null);
         if (post != null) {
+            String userId = (String) user.getAttribute("email");
+            post.getLikedBy().add(userId);
             post.setLikes(post.getLikes() + 1);
             postRepository.save(post);
             return new ResponseEntity<>(post, HttpStatus.OK);
@@ -60,10 +66,12 @@ public class PostController {
         }
     }
 
-    @PutMapping("/dislike/{id}")
-    public ResponseEntity<Post> dislikePost(@PathVariable String id) {
+    @GetMapping("/dislike/{id}")
+    public ResponseEntity<Post> dislikePost(@PathVariable String id, @AuthenticationPrincipal OAuth2User user) {
         Post post = postRepository.findById(id).orElse(null);
         if (post != null) {
+            String userId = (String) user.getAttribute("email");
+            post.getLikedBy().remove(userId);
             post.setLikes(post.getLikes() - 1);
             postRepository.save(post);
             return new ResponseEntity<>(post, HttpStatus.OK);

@@ -3,6 +3,9 @@ package com.example.FitDoc.model;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Document(collection = "posts")
 public class Post {
 
@@ -10,16 +13,18 @@ public class Post {
     private String id;
     private String content;
     private String imageUrl;
-    private String userName;
+    private String UserName;
     private String userImageUrl;
     private int likes;
     private String userEmailAddress;
+    private List<String> likedBy;
 
-    public Post(String content, String imageUrl, String UserName) {
+    public Post(String content, String imageUrl) {
         super();
         this.content = content;
         this.imageUrl = imageUrl;
         this.likes = 0;
+        this.likedBy = new ArrayList<>();
     }
 
     public int getLikes() {
@@ -41,7 +46,7 @@ public class Post {
     }
 
     public void setUserName(String userName) {
-        this.userName = userName;
+        this.UserName = userName;
     }
 
     public void setUserImageUrl(String userImageUrl) {
@@ -60,5 +65,16 @@ public class Post {
         this.userEmailAddress = userEmailAddress;
     }
 
+    public List<String> getLikedBy() {
+        return likedBy;
+    }
+
+    public void setLikedBy(List<String> likedBy) {
+        this.likedBy = likedBy;
+    }
+
+    public String getId() {
+        return id;
+    }
 }
 

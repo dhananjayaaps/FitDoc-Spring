@@ -1,9 +1,6 @@
 package com.example.FitDoc.controller;
 
-import com.example.FitDoc.model.UserDetailsDto;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -18,7 +15,8 @@ public class UserController {
         return user.getAttributes();
     }
 
-    private String getProfilePictureUrl(String username) {
-        return "https://example.com/profiles/" + username + "/picture";
+    @GetMapping("/user/image")
+    private String getProfilePictureUrl(String username, @AuthenticationPrincipal OAuth2User user) {
+        return user.getAttribute("picture");
     }
 }
