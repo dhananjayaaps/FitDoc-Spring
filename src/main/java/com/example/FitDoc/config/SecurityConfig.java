@@ -25,11 +25,20 @@ public class SecurityConfig {
         return http
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                .authorizeRequests(auth ->{
-                    auth.anyRequest().authenticated();
+                .authorizeRequests(auth -> {
+                    auth
+                            .requestMatchers("/authenticated").permitAll()
+                            .anyRequest().authenticated();
                 })
-                .oauth2Login(oath2->{
+                .oauth2Login(oath2 -> {
                     oath2.successHandler(oAuth2LoginSuccessHandler);
+                })
+                .logout(logout -> {
+                    logout
+                            .logoutUrl("/logout")
+                            .logoutSuccessUrl("http://localhost:3000/Login")
+                            .invalidateHttpSession(true)
+                            .deleteCookies("JSESSIONID");
                 })
                 .build();
     }
@@ -46,4 +55,3 @@ public class SecurityConfig {
         return source;
     }
 }
-
