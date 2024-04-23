@@ -76,5 +76,21 @@ public class Post {
     public String getId() {
         return id;
     }
+
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public String getUserName() {
+        return UserName;
+    }
+
+    public String getUserImageUrl() {
+        return userImageUrl;
+    }
+
+    public String getUserEmailAddress() {
+        return userEmailAddress;
+    }
 }
 

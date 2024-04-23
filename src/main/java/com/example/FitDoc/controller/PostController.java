@@ -22,10 +22,28 @@ public class PostController {
     private PostRepository postRepository;
 
     @GetMapping()
-    public String getAllPosts() {
+    public String getAllPosts(@AuthenticationPrincipal OAuth2User user) {
         List<Post> posts = postRepository.findAll();
+        String userId = (String) user.getAttribute("email");
+
+        JsonArray jsonArray = new JsonArray();
+
+        for (Post post : posts) {
+            JsonObject postObject = new JsonObject();
+
+            postObject.addProperty("id", post.getId());
+            postObject.addProperty("content", post.getContent());
+            postObject.addProperty("imageUrl", post.getImageUrl());
+            postObject.addProperty("UserName", post.getUserName());
+            postObject.addProperty("userImageUrl", post.getUserImageUrl());
+            postObject.addProperty("likes", post.getLikes());
+            postObject.addProperty("userEmailAddress", post.getUserEmailAddress());
+            boolean liked = post.getLikedBy().contains(userId);
+            postObject.addProperty("liked", liked);
+            jsonArray.add(postObject);
+        }
         Gson gson = new Gson();
-        String jsonPosts = gson.toJson(posts);
+        String jsonPosts = gson.toJson(jsonArray);
         return jsonPosts;
     }
 
