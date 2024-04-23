@@ -5,6 +5,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
 
@@ -19,5 +21,4 @@ public class OAuth2LoginSuccessHandler extends SavedRequestAwareAuthenticationSu
         this.setDefaultTargetUrl("http://localhost:3000/");
         super.onAuthenticationSuccess(request, response, authentication);
     }
-
 }
