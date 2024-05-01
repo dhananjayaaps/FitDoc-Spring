@@ -1,5 +1,6 @@
 package com.example.FitDoc.controller;
 
+import com.example.FitDoc.model.Comment;
 import com.example.FitDoc.model.Post;
 import com.example.FitDoc.repository.PostRepository;
 import com.nimbusds.jose.shaded.gson.Gson;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/posts")
@@ -34,8 +36,6 @@ public class PostController {
             JsonObject postObject = new JsonObject();
 
             String Timestamp = new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss").format(new Date());
-            System.out.println(Timestamp);
-            System.out.println(post.getTimestamp().substring(0, 10));
 
             if (Timestamp.equals(post.getTimestamp().substring(0, 10))) {
                 postObject.addProperty("timestamp", post.getTimestamp().substring(11, 16));
@@ -49,6 +49,21 @@ public class PostController {
             postObject.addProperty("UserName", post.getUserName());
             postObject.addProperty("userImageUrl", post.getUserImageUrl());
             postObject.addProperty("likes", post.getLikes());
+            postObject.addProperty("commentsCount", post.getComments().size());
+
+            // Construct JSON array for comments
+            JsonArray commentsArray = new JsonArray();
+            for (Comment comment : post.getComments()) {
+                JsonObject commentObject = new JsonObject();
+                commentObject.addProperty("content", comment.getContent());
+                commentObject.addProperty("commenterName", comment.getCommenterName());
+                commentObject.addProperty("commenterImageUrl", comment.getCommenterImageUrl());
+                commentObject.addProperty("commenterEmailAddress", comment.getCommenterEmailAddress());
+                commentObject.addProperty("timestamp", comment.getTimestamp());
+                commentsArray.add(commentObject);
+            }
+            postObject.add("comments", commentsArray);
+
             postObject.addProperty("userEmailAddress", post.getUserEmailAddress());
             boolean liked = post.getLikedBy().contains(userId);
             postObject.addProperty("liked", liked);
@@ -58,6 +73,7 @@ public class PostController {
         String jsonPosts = gson.toJson(jsonArray);
         return jsonPosts;
     }
+
 
     @GetMapping("/{id}")
     public ResponseEntity<Post> getPostById(@PathVariable String id) {
@@ -85,6 +101,10 @@ public class PostController {
 
     @GetMapping("/like/{id}")
     public ResponseEntity<Post> likePost(@PathVariable String id, @AuthenticationPrincipal OAuth2User user) {
+        return getPostResponseEntity(id, user, postRepository);
+    }
+
+    static ResponseEntity<Post> getPostResponseEntity(@PathVariable String id, @AuthenticationPrincipal OAuth2User user, PostRepository postRepository) {
         Post post = postRepository.findById(id).orElse(null);
         if (post != null) {
             String userId = (String) user.getAttribute("email");
@@ -128,4 +148,49 @@ public class PostController {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
+
+    @PostMapping("/{postId}/comments")
+    public ResponseEntity<Comment> addCommentToPost(@PathVariable String postId, @RequestBody Map<String, String> commentData, @AuthenticationPrincipal OAuth2User user) {
+        Post post = postRepository.findById(postId).orElse(null);
+        if (post == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
+        String content = commentData.get("content");
+
+        String commenterName = (String) user.getAttribute("name");
+        String commenterImageUrl = (String) user.getAttribute("picture");
+        String commenterEmailAddress = (String) user.getAttribute("email");
+        String timestamp = new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss").format(new Date());
+
+        Comment comment = new Comment(content);
+        comment.setCommenterName(commenterName);
+        comment.setCommenterImageUrl(commenterImageUrl);
+        comment.setCommenterEmailAddress(commenterEmailAddress);
+        comment.setTimestamp(timestamp);
+
+        // Add the comment to the post and save
+        post.getComments().add(comment);
+        postRepository.save(post);
+
+        return new ResponseEntity<>(comment, HttpStatus.CREATED);
+    }
+
+
+    @DeleteMapping("/{postId}/comments/{commentId}")
+    public ResponseEntity<Void> deleteCommentFromPost(@PathVariable String postId, @PathVariable String commentId) {
+        Post post = postRepository.findById(postId).orElse(null);
+        if (post == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
+        boolean removed = post.getComments().removeIf(comment -> comment.getId().equals(commentId));
+        if (removed) {
+            postRepository.save(post);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+
 }

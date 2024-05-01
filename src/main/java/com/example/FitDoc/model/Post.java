@@ -18,6 +18,7 @@ public class Post {
     private int likes;
     private String userEmailAddress;
     private List<String> likedBy;
+    private List<Comment> comments;
     private String timestamp;
 
     public Post(String content, String imageUrl) {
@@ -26,6 +27,7 @@ public class Post {
         this.imageUrl = imageUrl;
         this.likes = 0;
         this.likedBy = new ArrayList<>();
+        this.comments = new ArrayList<>();
     }
 
     public int getLikes() {
@@ -100,6 +102,14 @@ public class Post {
 
     public void setTimestamp(String timestamp) {
         this.timestamp = timestamp;
+    }
+
+    public List<Comment> getComments() {
+        return comments;
+    }
+
+    public void setComments(List<Comment> comments) {
+        this.comments = comments;
     }
 }
 
