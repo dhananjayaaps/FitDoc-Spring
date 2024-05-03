@@ -3,6 +3,7 @@ package com.example.FitDoc.model;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Document(collection = "users")
@@ -14,6 +15,7 @@ public class User {
     private String username;
     private String imageUrl;
     private List<String> followedBy;
+    private List<String> notifications;
     private int followers;
     private String userImageUrl;
 
@@ -24,7 +26,8 @@ public class User {
         this.email = email;
         this.imageUrl = imageUrl;
         this.followers = 0;
-        this.followedBy = null;
+        this.followedBy = new ArrayList<>();
+        this.notifications = new ArrayList<>();
     }
 
     public String getName() {
@@ -81,5 +84,13 @@ public class User {
 
     public void setUsername(String username) {
         this.username = username;
+    }
+
+    public List<String> getNotifications() {
+        return notifications;
+    }
+
+    public void addNotification(String notification) {
+        notifications.add(notification);
     }
 }

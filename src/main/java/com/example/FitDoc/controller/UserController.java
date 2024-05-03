@@ -42,5 +42,6 @@ public class UserController {
     public String logout() {
         return "redirect:http://localhost:3000/";
     }
+
 }
 

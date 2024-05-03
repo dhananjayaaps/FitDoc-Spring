@@ -2,7 +2,9 @@ package com.example.FitDoc.controller;
 
 import com.example.FitDoc.model.Comment;
 import com.example.FitDoc.model.Post;
+import com.example.FitDoc.model.User;
 import com.example.FitDoc.repository.PostRepository;
+import com.example.FitDoc.repository.UserRepository;
 import com.nimbusds.jose.shaded.gson.Gson;
 import com.nimbusds.jose.shaded.gson.JsonArray;
 import com.nimbusds.jose.shaded.gson.JsonObject;
@@ -22,8 +24,14 @@ import java.util.Map;
 @RequestMapping("/posts")
 public class PostController {
 
+
     @Autowired
     private PostRepository postRepository;
+    private final UserRepository userRepository;
+
+    public PostController(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
 
     @GetMapping()
     public String getAllPosts(@AuthenticationPrincipal OAuth2User user) {
@@ -104,13 +112,23 @@ public class PostController {
         return getPostResponseEntity(id, user, postRepository);
     }
 
-    static ResponseEntity<Post> getPostResponseEntity(@PathVariable String id, @AuthenticationPrincipal OAuth2User user, PostRepository postRepository) {
+    ResponseEntity<Post> getPostResponseEntity(@PathVariable String id, @AuthenticationPrincipal OAuth2User user, PostRepository postRepository) {
         Post post = postRepository.findById(id).orElse(null);
         if (post != null) {
             String userId = (String) user.getAttribute("email");
+
             post.getLikedBy().add(userId);
             post.setLikes(post.getLikes() + 1);
             postRepository.save(post);
+
+            //create a notification for the post owner
+            String name = (String) user.getAttribute("name");
+            String postOwner = post.getUserEmailAddress();
+            User gettingUser = userRepository.findByEmail(postOwner);
+            String text = "Your post has been liked by " + name;
+            gettingUser.addNotification(text);
+            this.userRepository.save(gettingUser);
+
             return new ResponseEntity<>(post, HttpStatus.OK);
         } else {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -174,6 +192,14 @@ public class PostController {
         // Add the comment to the post and save
         post.getComments().add(comment);
         postRepository.save(post);
+
+        //create a notification for the post owner
+        String name = (String) user.getAttribute("name");
+        String postOwner = post.getUserEmailAddress();
+        User gettingUser = userRepository.findByEmail(postOwner);
+        String text = "Your post has been commented by " + name;
+        gettingUser.addNotification(text);
+        userRepository.save(gettingUser);
 
         return new ResponseEntity<>(comment, HttpStatus.CREATED);
     }
