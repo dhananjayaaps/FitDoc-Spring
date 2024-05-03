@@ -25,9 +25,12 @@ public class UserController {
         if (authentication == null || !authentication.isAuthenticated()) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User is not authenticated");
         }
-
-        OAuth2User user = (OAuth2User) authentication.getPrincipal();
-        return ResponseEntity.ok("ok");
+        try {
+            OAuth2User user = (OAuth2User) authentication.getPrincipal();
+            return ResponseEntity.ok("ok");
+        } catch (ClassCastException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User is not authenticated");
+        }
     }
 
     @GetMapping("/user/image")
