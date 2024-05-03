@@ -162,8 +162,10 @@ public class PostController {
         String commenterImageUrl = (String) user.getAttribute("picture");
         String commenterEmailAddress = (String) user.getAttribute("email");
         String timestamp = new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss").format(new Date());
-
         Comment comment = new Comment(content);
+
+        String id = Long.toHexString(Double.doubleToLongBits(Math.random()));
+        comment.setId(id);
         comment.setCommenterName(commenterName);
         comment.setCommenterImageUrl(commenterImageUrl);
         comment.setCommenterEmailAddress(commenterEmailAddress);

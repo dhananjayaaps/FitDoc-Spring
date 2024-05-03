@@ -4,7 +4,7 @@ import org.springframework.data.annotation.Id;
 
 public class Comment {
 
-    @Id
+//    @Id
     private String id;
     private String content;
     private String commenterName;
@@ -13,6 +13,7 @@ public class Comment {
     private String timestamp;
 
     public Comment(String content) {
+        super();
         this.content = content;
     }
 
