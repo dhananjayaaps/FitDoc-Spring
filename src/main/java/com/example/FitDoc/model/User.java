@@ -18,6 +18,8 @@ public class User {
     private List<String> notifications;
     private int followers;
     private String userImageUrl;
+    private String bio;
+    private String mobile;
 
     public User(String name, String email, String imageUrl, String username) {
         super();
@@ -28,6 +30,8 @@ public class User {
         this.followers = 0;
         this.followedBy = new ArrayList<>();
         this.notifications = new ArrayList<>();
+        this.bio = "Welcome to the FitDoc community!";
+        this.mobile = "Not Set";
     }
 
     public String getName() {
@@ -93,4 +97,9 @@ public class User {
     public void addNotification(String notification) {
         notifications.add(notification);
     }
+
+    public String getBio() {return bio;}
+    public void setBio(String bio) {this.bio = bio;}
+    public String getMobile() {return mobile;}
+    public void setMobile(String mobile) {this.mobile = mobile;}
 }

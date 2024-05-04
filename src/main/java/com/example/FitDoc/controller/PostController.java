@@ -189,11 +189,9 @@ public class PostController {
         comment.setCommenterEmailAddress(commenterEmailAddress);
         comment.setTimestamp(timestamp);
 
-        // Add the comment to the post and save
         post.getComments().add(comment);
         postRepository.save(post);
 
-        //create a notification for the post owner
         String name = (String) user.getAttribute("name");
         String postOwner = post.getUserEmailAddress();
         User gettingUser = userRepository.findByEmail(postOwner);
