@@ -63,6 +63,7 @@ public class PostController {
             JsonArray commentsArray = new JsonArray();
             for (Comment comment : post.getComments()) {
                 JsonObject commentObject = new JsonObject();
+                commentObject.addProperty("id", comment.getId());
                 commentObject.addProperty("content", comment.getContent());
                 commentObject.addProperty("commenterName", comment.getCommenterName());
                 commentObject.addProperty("commenterImageUrl", comment.getCommenterImageUrl());
